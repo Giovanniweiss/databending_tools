@@ -70,7 +70,7 @@ def apply_blur(image, radius):
     filtered_image = image.filter(ImageFilter.BoxBlur(radius))
     return filtered_image
 
-def process_image(image_path, output_path):
+def process_image(image_path, output_path, intensity):
     with Image.open(image_path) as original_img:
         original_img = original_img.convert('RGB')
         edited_img = original_img.copy()
@@ -86,8 +86,9 @@ def process_image(image_path, output_path):
         for y in range(1, height-1):
             for x in range(1, width-1):
                 sobel_value = sobel_pixels[x, y]
-                n = int(sobel_value * 200 / 255)  # Map to 0-100
-                if n < 50:
+                stretch = (intensity) * height / 200
+                n = int(sobel_value * stretch / 255)  # Map to 0-100
+                if n < stretch / 2:
                     n = 0
                 new_y = min(height-1, y + n)  # Ensure we don't go out of bounds
 
@@ -99,6 +100,9 @@ def process_image(image_path, output_path):
         edited_img.save(output_path)
 
 # Example usage
-input_image_path = 'input_image.bmp'
-output_image_path = 'output_image.bmp'
-process_image(input_image_path, output_image_path)
+input_image_path = 'input_image.jpeg'
+output_image_path = 'output_image'
+suffix = ".jpg"
+for i in range(10, 110, 10):
+    output = output_image_path + str(i) + suffix
+    process_image(input_image_path, output, i)
